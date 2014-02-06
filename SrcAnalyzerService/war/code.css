@@ -1,0 +1,16 @@
+code		{
+	background-color: ivory;
+	display: block;
+	font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace !important;
+	font-size: small;
+}
+.comment	{color: #008000; font-weight: normal; font-style: normal; }
+.identifier	{color: #000000; font-weight: normal; font-style: normal; }
+.keyword	{color: #0000F0; font-weight: normal; font-style: normal; }
+.literal	{color: #800000; font-weight: normal; font-style: normal; }
+.startTag	{color: #003399; font-weight: normal; font-style: normal; }
+.endTag		{color: #003399; font-weight: normal; font-style: normal; }
+.tagName	{color: #660066; font-weight: normal; font-style: normal; }
+.tagAttribute	{color: #990066; font-weight: normal; font-style: normal; }
+.other		{color: #000000; font-weight: normal; font-style: normal; }
+

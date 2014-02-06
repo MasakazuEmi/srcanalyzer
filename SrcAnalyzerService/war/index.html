@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>SrcAnalyzerService</title>
+	<link rel="stylesheet" type="text/css" href="./code.css" />
+	<style type="text/css">
+		body  { background-color: #F5F5F5; }
+		.button {
+			width: 100%;
+			margin-top: 5px;
+			margin-bottom: 5px;
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: large;
+			color: black;
+			background-color: #696969;
+			border-radius: 10px;
+			border: 1px solid #000000;
+			text-shadow:
+				0px -1px 0px rgba(000,000,000,0.4),
+				0px 1px 0px rgba(255,255,255,0.3);
+		}
+		ul {
+			list-style-type: none;
+			font-size: large;
+		}
+		li {
+			display: block;
+		}
+		.autoWidth {
+			width: 100%
+		}
+	</style>
+	<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+	<script type="text/javascript">google.load("jquery", "1.6");</script>
+	<script type="text/javascript" src="./script/jquery.history.js"></script>
+	<script type="text/javascript">
+	var codeView;
+	(function($) {
+		var CodeView = function(code, list) {
+			var LinkAttr = function(basePath, link) {
+				this.basePath = basePath;
+				this.link = link;
+			}
+			LinkAttr.prototype = {
+				path: function() {
+					return $("<a href='" + this.basePath + this.link.attr("href") + "' />").get(0).href;
+				},
+				text: function() {
+					return this.link.text();
+				}
+			}
+			var createLink = function(link) {
+				return "<a href=\"#" + link.path() + "\" onclick=\"javascript:codeView.doLink('" + link.path() + "')\" class='link'>" + link.text() + "</ a>";
+			}
+
+			var isDir = function(url) {
+				return url.slice(-1) == "/";
+			}
+
+			this.doLink = function(path) {
+				$('#url').val(path);
+				this.go();
+			}
+			this.go = function(url) {
+				var url = url || $("#url").val();
+				if(!isDir(url)) {
+					code.text("Loading...");
+					$.ajax({
+						url: "./service/srcanalyzer/code",
+						dataType: "text",
+						data: { "url" : url },
+						type: "GET",
+						success: function(data, textStatus) {
+							code.html(data);
+						},
+						error: function(xhr, textStatus, errorThrown) {
+							alert("an error occurred! " + errorThrown);
+						}
+					});
+				} else {
+					code.text("");
+					list.text("Loading...");
+					$.ajax({
+						url: "./service/proxy",
+						dataType: "text",
+						data: { "url" : url },
+						type: "GET",
+						success: function(data, textStatus) {
+							list.html(function() {
+								var li = "<ul>";
+								$("li a", data).each(function() {
+									li += "<li>" + createLink(new LinkAttr(url, $(this))) + "</li>";
+								})
+								li += "</ul>";
+								return li;
+							});
+						},
+						error: function(xhr, textStatus, errorThrown) {
+							alert("an error occurred! " + errorThrown);
+						}
+					})
+				}
+			}
+		}
+
+		$(document).ready(function() {
+			codeView = new CodeView($("#code"), $("#list"));
+
+			$.history.init(function(hash) {
+				if(hash) {
+					codeView.doLink(hash);
+				}
+			});
+			$("a link").click(function() {
+				$.history.load($(this).html());
+				return false;
+			});
+
+			$("#go").click(function() {
+				var url = $("#url").val();
+				if(url) {
+					$("#code").text("");
+					$("#list").text("");
+					codeView.go(url);
+				}
+			});
+		});
+	})(jQuery)
+	</script>
+</head>
+<body>
+	<input id="url" type="text" class="autoWidth" value="http://svn.myspoon.info/repos/"></input>
+	<input id="go" type="submit" class="button" value="go"/>
+	<br />
+	<div id="list"></div>
+	<code id="code"></code>
+</body>
+</html>
